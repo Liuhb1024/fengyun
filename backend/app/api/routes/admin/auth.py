@@ -26,7 +26,7 @@ async def login(
     if admin is None or not verify_password(payload.password, admin.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="用户名或密码错误")
     token, expires_at, jti = create_access_token(admin.username)
-    admin.last_login_at = datetime.now(timezone.utc)
+    admin.last_login_at = datetime.now()
     admin.last_login_ip = request.client.host if request.client else None
     await session.flush()
     await record_operation(
@@ -83,4 +83,3 @@ async def logout(
     expires_at = datetime.fromtimestamp(payload.exp, tz=timezone.utc)
     await revoke_token(payload.jti, expires_at)
     return {"message": f"{current_admin.username} logged out"}
-
