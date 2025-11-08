@@ -1,3 +1,4 @@
+import type { ProFormInstance } from '@ant-design/pro-components';
 import {
   ActionType,
   ModalForm,
@@ -10,7 +11,7 @@ import {
   ProForm,
 } from '@ant-design/pro-components';
 import { Button, Image, Popconfirm } from 'antd';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { CarouselItem } from '@/services/yingge';
 import { carouselAPI } from '@/services/yingge';
 import Uploader from '@/components/Uploader';
@@ -20,6 +21,17 @@ const CarouselPage: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<CarouselItem | undefined>();
   const [submitting, setSubmitting] = useState(false);
+  const formRef = useRef<ProFormInstance<CarouselItem>>(null);
+
+  useEffect(() => {
+    if (modalOpen) {
+      if (editing) {
+        formRef.current?.setFieldsValue(editing);
+      } else {
+        formRef.current?.resetFields();
+      }
+    }
+  }, [modalOpen, editing]);
 
   const handleSubmit = async (values: Partial<CarouselItem>) => {
     setSubmitting(true);
@@ -106,9 +118,14 @@ const CarouselPage: React.FC = () => {
 
       <ModalForm<CarouselItem>
         title={editing ? '编辑轮播图' : '新增轮播图'}
+        formRef={formRef}
         open={modalOpen}
-        initialValues={editing}
-        onOpenChange={setModalOpen}
+        onOpenChange={(visible) => {
+          setModalOpen(visible);
+          if (!visible) {
+            setEditing(undefined);
+          }
+        }}
         submitter={{
           submitButtonProps: { loading: submitting },
         }}
