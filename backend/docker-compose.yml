@@ -1,0 +1,62 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yingge-app
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - minio
+    command: >
+      poetry run uvicorn app.main:app
+      --host 0.0.0.0 --port 8000 --reload
+
+  db:
+    image: mysql:8.0
+    container_name: yingge-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: yingge_db
+      MYSQL_USER: yingge
+      MYSQL_PASSWORD: yingge
+      MYSQL_ROOT_PASSWORD: rootpass
+      TZ: Asia/Shanghai
+    ports:
+      - "33060:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ../database/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: yingge-redis
+    restart: unless-stopped
+    ports:
+      - "63790:6379"
+
+  minio:
+    image: quay.io/minio/minio
+    container_name: yingge-minio
+    environment:
+      MINIO_ROOT_USER: mingo
+      MINIO_ROOT_PASSWORD: mingo-secret
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+
+volumes:
+  db_data:
+  minio_data:
+

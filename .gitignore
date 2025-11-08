@@ -1,0 +1,38 @@
+# 系统
+.DS_Store
+Thumbs.db
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.python-version
+.ruff_cache/
+.mypy_cache/
+.pytest_cache/
+
+# 环境与依赖
+.env
+.env.*
+backend/.env
+venv/
+.venv/
+
+# 编辑器
+.idea/
+.vscode/
+
+# 构建/运行
+dist/
+build/
+coverage/
+.coverage*
+
+# Docker
+backend/.docker/
+
+# Node / 前端
+admin/node_modules/
+admin/dist/
+admin/.umi/
