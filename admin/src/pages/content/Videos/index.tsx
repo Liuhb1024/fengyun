@@ -1,3 +1,4 @@
+import type { ProFormInstance } from '@ant-design/pro-components';
 import {
   ActionType,
   ModalForm,
@@ -9,7 +10,7 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm } from 'antd';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { VideoItem } from '@/services/yingge';
 import { videoAPI } from '@/services/yingge';
 import Uploader from '@/components/Uploader';
@@ -18,6 +19,7 @@ const VideoLibrary: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<VideoItem | undefined>();
+  const formRef = useRef<ProFormInstance<VideoItem>>(null);
 
   const submit = async (values: Partial<VideoItem>) => {
     if (editing) {
@@ -29,6 +31,16 @@ const VideoLibrary: React.FC = () => {
     setEditing(undefined);
     actionRef.current?.reload();
   };
+
+  useEffect(() => {
+    if (open) {
+      if (editing) {
+        formRef.current?.setFieldsValue(editing);
+      } else {
+        formRef.current?.resetFields();
+      }
+    }
+  }, [open, editing]);
 
   const columns: ProColumns<VideoItem>[] = [
     { title: '标题', dataIndex: 'title_zh' },
@@ -86,9 +98,14 @@ const VideoLibrary: React.FC = () => {
 
       <ModalForm<VideoItem>
         title={editing ? '编辑视频' : '新增视频'}
+        formRef={formRef}
         open={open}
-        initialValues={editing}
-        onOpenChange={setOpen}
+        onOpenChange={(visible) => {
+          setOpen(visible);
+          if (!visible) {
+            setEditing(undefined);
+          }
+        }}
         onFinish={async (values) => {
           await submit(values);
           return true;

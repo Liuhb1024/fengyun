@@ -1,3 +1,4 @@
+import type { ProFormInstance } from '@ant-design/pro-components';
 import {
   ActionType,
   ModalForm,
@@ -12,7 +13,7 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm } from 'antd';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { ImageItem } from '@/services/yingge';
 import { imageAPI } from '@/services/yingge';
 import Uploader from '@/components/Uploader';
@@ -33,6 +34,7 @@ const ImageLibrary: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<ImageItem | undefined>();
+  const formRef = useRef<ProFormInstance<ImageItem>>(null);
 
   const submit = async (values: Partial<ImageItem>) => {
     const payload = {
@@ -48,6 +50,19 @@ const ImageLibrary: React.FC = () => {
     setEditing(undefined);
     actionRef.current?.reload();
   };
+
+  useEffect(() => {
+    if (open) {
+      if (editing) {
+        formRef.current?.setFieldsValue({
+          ...editing,
+          shot_date: editing.shot_date || undefined,
+        });
+      } else {
+        formRef.current?.resetFields();
+      }
+    }
+  }, [open, editing]);
 
   const columns: ProColumns<ImageItem>[] = [
     {
@@ -129,9 +144,14 @@ const ImageLibrary: React.FC = () => {
 
       <ModalForm<ImageItem>
         title={editing ? '编辑图片' : '新增图片'}
+        formRef={formRef}
         open={open}
-        initialValues={editing}
-        onOpenChange={setOpen}
+        onOpenChange={(visible) => {
+          setOpen(visible);
+          if (!visible) {
+            setEditing(undefined);
+          }
+        }}
         onFinish={async (values) => {
           await submit(values);
           return true;
