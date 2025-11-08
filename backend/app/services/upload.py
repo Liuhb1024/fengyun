@@ -14,7 +14,21 @@ from app.core.config import settings
 
 UPLOAD_DIR = Path(__file__).resolve().parent.parent / "storage"
 SAFE_CATEGORY = re.compile(r"^[a-zA-Z0-9][a-zA-Z0-9_-]{0,30}$")
-MAX_SIZE_BYTES = {"avatars": 10 * 1024 * 1024}
+MAX_SIZE_BYTES = {
+    "avatars": 10 * 1024 * 1024,
+    "carousels": 15 * 1024 * 1024,
+    "images": 20 * 1024 * 1024,
+    "videos": 500 * 1024 * 1024,
+    "audios": 100 * 1024 * 1024,
+    "general": 50 * 1024 * 1024,
+}
+ACCEPT_MIME_PREFIX = {
+    "avatars": ("image/",),
+    "carousels": ("image/",),
+    "images": ("image/",),
+    "videos": ("video/",),
+    "audios": ("audio/",),
+}
 
 _cos_client: CosS3Client | None = None
 
@@ -70,9 +84,15 @@ def _build_object_key(category: str, filename: str) -> str:
 async def save_file(file: UploadFile, category: str | None = None) -> dict[str, Any]:
     category_name = _sanitize_category(category)
     content = await file.read()
-    max_size = MAX_SIZE_BYTES.get(category_name)
+    max_size = MAX_SIZE_BYTES.get(category_name, MAX_SIZE_BYTES["general"])
     if max_size and len(content) > max_size:
-        raise HTTPException(status_code=400, detail="文件尺寸超出限制，请上传不超过 10MB 的头像")
+        readable = f"{max_size / (1024 * 1024):.0f}MB"
+        raise HTTPException(status_code=400, detail=f"文件尺寸超出限制（<= {readable}）")
+
+    mime_prefix = ACCEPT_MIME_PREFIX.get(category_name)
+    if mime_prefix and file.content_type:
+        if not any(file.content_type.startswith(prefix) for prefix in mime_prefix):
+            raise HTTPException(status_code=400, detail="文件类型不支持，请选择正确的格式")
 
     client = _get_cos_client()
     if client:

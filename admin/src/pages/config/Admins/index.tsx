@@ -282,7 +282,12 @@ const AdminAccountsPage: React.FC = () => {
           valuePropName="value"
           extra="支持 JPG/PNG，文件大小不超过 10MB"
         >
-          <Uploader category="avatars" accept="image/*" hint="建议上传正方形头像" />
+          <Uploader
+            category="avatars"
+            accept="image/*"
+            hint="建议上传正方形头像"
+            maxSizeMB={10}
+          />
         </ProForm.Item>
         <ProFormSelect
           name="role"
