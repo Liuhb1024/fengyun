@@ -7,11 +7,13 @@ import {
   ProFormSwitch,
   ProFormText,
   ProTable,
+  ProForm,
 } from '@ant-design/pro-components';
 import { Button, Image, Popconfirm } from 'antd';
 import React, { useRef, useState } from 'react';
 import type { CarouselItem } from '@/services/yingge';
 import { carouselAPI } from '@/services/yingge';
+import Uploader from '@/components/Uploader';
 
 const CarouselPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
@@ -115,7 +117,20 @@ const CarouselPage: React.FC = () => {
           return true;
         }}
       >
-        <ProFormText name="image_url" label="图片地址" rules={[{ required: true }]} />
+        <ProForm.Item
+          name="image_url"
+          label="轮播图片"
+          rules={[{ required: true, message: '请上传轮播图片' }]}
+          valuePropName="value"
+          extra="建议 1920×600px 以上，大小不超过 15MB"
+        >
+          <Uploader
+            category="carousels"
+            accept="image/*"
+            maxSizeMB={15}
+            hint="支持 jpg/png/webp"
+          />
+        </ProForm.Item>
         <ProFormText name="title_zh" label="中文标题" />
         <ProFormText name="link_url" label="跳转链接" />
         <ProFormDigit name="sort_order" label="排序" min={0} />
