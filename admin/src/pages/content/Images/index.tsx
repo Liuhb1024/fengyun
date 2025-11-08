@@ -3,6 +3,7 @@ import {
   ModalForm,
   PageContainer,
   ProColumns,
+  ProForm,
   ProFormDatePicker,
   ProFormDigit,
   ProFormSelect,
@@ -14,6 +15,7 @@ import { Button, Popconfirm } from 'antd';
 import React, { useRef, useState } from 'react';
 import type { ImageItem } from '@/services/yingge';
 import { imageAPI } from '@/services/yingge';
+import Uploader from '@/components/Uploader';
 
 const categoryOptions = [
   { label: '演出现场', value: 'performance' },
@@ -136,8 +138,23 @@ const ImageLibrary: React.FC = () => {
         }}
       >
         <ProFormText name="title_zh" label="标题" rules={[{ required: true }]} />
-        <ProFormText name="url" label="原图地址" rules={[{ required: true }]} />
-        <ProFormText name="thumbnail_url" label="缩略图地址" />
+        <ProForm.Item
+          name="url"
+          label="原图"
+          valuePropName="value"
+          rules={[{ required: true, message: '请上传原图' }]}
+          extra="建议大于 1920px，大小 ≤ 20MB"
+        >
+          <Uploader category="images" accept="image/*" maxSizeMB={20} hint="支持 jpg/png/webp" />
+        </ProForm.Item>
+        <ProForm.Item
+          name="thumbnail_url"
+          label="缩略图"
+          valuePropName="value"
+          extra="可选，大小 ≤ 5MB，如留空可在前端生成"
+        >
+          <Uploader category="images" accept="image/*" maxSizeMB={5} hint="建议 400×400px" />
+        </ProForm.Item>
         <ProFormSelect name="category" label="分类" options={categoryOptions} allowClear />
         <ProFormDatePicker name="shot_date" label="拍摄日期" />
         <ProFormDigit name="view_count" label="浏览次数" min={0} />
