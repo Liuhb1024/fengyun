@@ -50,6 +50,11 @@ const routes = [
         component: './content/Audios/index',
       },
       {
+        name: '重要节点',
+        path: '/content/milestones',
+        component: './content/Milestones/index',
+      },
+      {
         name: '文章资讯',
         path: '/content/articles',
         component: './content/Articles/index',

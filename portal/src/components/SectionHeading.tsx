@@ -11,13 +11,20 @@ const SectionHeading: React.FC<SectionHeadingProps> = ({
   description,
   align = 'left',
 }) => {
+  const alignClass = align === 'center' ? 'items-center text-center' : 'items-start text-left';
+
   return (
-    <div className={align === 'center' ? 'text-center' : 'text-left'}>
+    <div className={`flex flex-col gap-3 ${alignClass}`}>
       {eyebrow && (
-        <p className="mb-2 text-sm uppercase tracking-[0.4em] text-accent">{eyebrow}</p>
+        <div className="accent-chip">
+          <span>{eyebrow}</span>
+        </div>
       )}
-      <h2 className="font-display text-3xl md:text-4xl text-white">{title}</h2>
-      {description && <p className="mt-3 text-base text-white/70">{description}</p>}
+      <h2 className="font-display text-3xl text-white md:text-4xl">
+        <span className="gradient-text">{title}</span>
+      </h2>
+      <div className="h-px w-24 bg-gradient-to-r from-[var(--color-crimson)] via-[var(--color-accent)] to-transparent" />
+      {description && <p className="text-base text-white/70">{description}</p>}
     </div>
   );
 };

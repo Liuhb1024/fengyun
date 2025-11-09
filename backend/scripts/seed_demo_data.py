@@ -14,6 +14,7 @@ from app.db.models import (
     Audio,
     Carousel,
     Image,
+    MilestoneEvent,
     Member,
     Navigation,
     OperationLog,
@@ -26,7 +27,7 @@ from app.db.session import async_session
 
 async def seed():
     async with async_session() as session:
-        for model in [OperationLog, Carousel, Image, Video, Audio, Article, Member, Navigation, SEOConfig, SystemConfig]:
+        for model in [OperationLog, Carousel, Image, Video, Audio, Article, Member, Navigation, SEOConfig, SystemConfig, MilestoneEvent]:
             await session.execute(delete(model))
 
         now = datetime.utcnow()
@@ -162,8 +163,56 @@ async def seed():
                     ensure_ascii=False,
                 ),
             ),
+            SystemConfig(
+                config_key="contact_info",
+                config_value=json.dumps(
+                    {
+                        "title": "预约演出 / 合作洽谈",
+                        "description": "支持巡演、品牌定制演出、沉浸式发布会以及非遗研学课程，欢迎联系团队获取方案。",
+                        "phone": "+86 138 0000 0000",
+                        "email": "heritage@yingge.com",
+                        "wechat": "yingge_official",
+                        "locations": ["汕头", "深圳", "上海", "全球巡演"],
+                        "tags": ["品牌共创", "国际巡演", "教育工作坊", "沉浸体验"],
+                        "cta_text": "立即联系",
+                        "cta_link": "mailto:heritage@yingge.com",
+                    },
+                    ensure_ascii=False,
+                ),
+            ),
         ]
         session.add_all(system_configs)
+
+        milestones = [
+            MilestoneEvent(
+                title="英歌队成立",
+                description="正式组建潮汕英歌舞团队，开启非遗传承之路。",
+                event_date=now.date().replace(year=now.year - 10),
+                location="汕头",
+                highlight=True,
+                sort_order=100,
+                category="里程碑",
+            ),
+            MilestoneEvent(
+                title="首个国际巡演",
+                description="赴欧洲展开文化交流演出，获得国际媒体关注。",
+                event_date=now.date().replace(year=now.year - 6),
+                location="巴黎",
+                highlight=True,
+                sort_order=90,
+                category="巡演",
+            ),
+            MilestoneEvent(
+                title="沉浸式发布会合作",
+                description="与知名品牌联合打造沉浸式新品发布会，融合英歌舞元素。",
+                event_date=now.date().replace(year=now.year - 2),
+                location="上海",
+                highlight=False,
+                sort_order=80,
+                category="品牌合作",
+            ),
+        ]
+        session.add_all(milestones)
 
         await session.commit()
         print("Demo data seeded successfully.")

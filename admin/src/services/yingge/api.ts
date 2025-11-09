@@ -180,6 +180,25 @@ export const systemAPI = {
         data,
       }),
     ),
+  getContactInfo: () =>
+    unwrap(request<ApiResponse<ContactInfo>>('/admin/system/contact-info', { method: 'GET' })),
+  updateContactInfo: (data: ContactInfo) =>
+    unwrap(
+      request<ApiResponse<ContactInfo>>('/admin/system/contact-info', {
+        method: 'PUT',
+        data,
+      }),
+    ),
+};
+
+export const milestoneAPI = {
+  list: (params?: PageParams) => listRequest<MilestoneItem>('/admin/milestones', params),
+  create: (data: Partial<MilestoneItem>) =>
+    unwrap(request<ApiResponse<MilestoneItem>>('/admin/milestones', { method: 'POST', data })),
+  update: (id: number, data: Partial<MilestoneItem>) =>
+    unwrap(request<ApiResponse<MilestoneItem>>(`/admin/milestones/${id}`, { method: 'PUT', data })),
+  remove: (id: number) =>
+    request<ApiResponse<Record<string, unknown>>>(`/admin/milestones/${id}`, { method: 'DELETE' }),
 };
 
 export const statsAPI = {
@@ -333,6 +352,30 @@ export type SystemConfigItem = {
   config_value: string;
   description?: string;
   updated_at?: string;
+};
+
+export type MilestoneItem = {
+  id: number;
+  title: string;
+  description?: string;
+  event_date: string;
+  location?: string;
+  highlight?: boolean;
+  sort_order?: number;
+  category?: string;
+  cover_url?: string;
+};
+
+export type ContactInfo = {
+  title?: string;
+  description?: string;
+  phone?: string;
+  email?: string;
+  wechat?: string;
+  locations?: string[];
+  tags?: string[];
+  cta_text?: string;
+  cta_link?: string;
 };
 
 export type StatsOverview = {

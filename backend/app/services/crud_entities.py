@@ -4,6 +4,7 @@ from app.db.models import (
     Carousel,
     Image,
     Member,
+    MilestoneEvent,
     Navigation,
     SEOConfig,
     SystemConfig,
@@ -14,6 +15,7 @@ from app.schemas.audio import AudioCreate, AudioUpdate
 from app.schemas.carousel import CarouselCreate, CarouselUpdate
 from app.schemas.image import ImageCreate, ImageUpdate
 from app.schemas.member import MemberCreate, MemberUpdate
+from app.schemas.milestone import MilestoneCreate, MilestoneUpdate
 from app.schemas.navigation import NavigationCreate, NavigationUpdate
 from app.schemas.seo import SEOConfigCreate, SEOConfigUpdate
 from app.schemas.system_config import SystemConfigCreate, SystemConfigUpdate
@@ -29,4 +31,4 @@ member_crud = CRUDBase[Member, MemberCreate, MemberUpdate](Member)
 navigation_crud = CRUDBase[Navigation, NavigationCreate, NavigationUpdate](Navigation)
 seo_crud = CRUDBase[SEOConfig, SEOConfigCreate, SEOConfigUpdate](SEOConfig)
 system_config_crud = CRUDBase[SystemConfig, SystemConfigCreate, SystemConfigUpdate](SystemConfig)
-
+milestone_crud = CRUDBase[MilestoneEvent, MilestoneCreate, MilestoneUpdate](MilestoneEvent)

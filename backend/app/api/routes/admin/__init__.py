@@ -7,6 +7,7 @@ from . import (
     auth,
     carousel,
     image,
+    milestones,
     logs,
     member,
     navigation,
@@ -33,3 +34,4 @@ router.include_router(system.router, prefix="/system", tags=["System Config"])
 router.include_router(upload.router, prefix="/upload", tags=["Upload"])
 router.include_router(stats.router, prefix="/stats", tags=["Statistics"])
 router.include_router(logs.router, prefix="/logs", tags=["Operation Logs"])
+router.include_router(milestones.router, prefix="/milestones", tags=["Milestones"])

@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion';
 import type { MemberItem } from '../api/portal';
 import SectionHeading from '../components/SectionHeading';
 
@@ -7,34 +8,40 @@ interface MemberSpotlightProps {
 
 const MemberSpotlight: React.FC<MemberSpotlightProps> = ({ members }) => {
   if (!members.length) return null;
+  const spotlight = members.slice(0, 6);
+
   return (
-    <section id="members" className="bg-[#f5f5f7] py-24">
-      <div className="mx-auto max-w-6xl px-6">
+    <section id="members" className="px-6 py-24">
+      <div className="sunrise-glow card-surface mx-auto max-w-6xl rounded-[36px] border border-[rgba(246,196,92,0.2)] p-10 text-center text-white">
         <SectionHeading
-          eyebrow="Team"
-          title="英歌灵魂 · 核心成员"
-          description="从首席鼓手到青年传承人，每一位成员都是非遗故事的讲述者。"
           align="center"
+          eyebrow="Heritage Ensemble"
+          title={"\u82F1\u6B4C\u7075\u9B42\u4EBA\u7269"}
+          description={
+            "\u9F13\u624B\u3001\u65D7\u624B\u3001\u5531\u9886\u4E0E\u9752\u5E74\u4F20\u627F\u4EBA\u540C\u53F0\uFF0C\u5171\u6784\u82F1\u6B4C\u821E\u7684\u201C\u547C\u5438\u7CFB\u7EDF\u201D\u3002"
+          }
         />
         <div className="mt-12 grid gap-6 md:grid-cols-3">
-          {members.slice(0, 6).map((member) => (
-            <article
+          {spotlight.map((member, index) => (
+            <motion.article
               key={member.id}
-              className="rounded-3xl border border-white/60 bg-white p-6 shadow-lg transition hover:-translate-y-1 hover:shadow-xl"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              viewport={{ once: true, amount: 0.3 }}
+              className="card-surface relative overflow-hidden rounded-[28px] p-6 text-left"
             >
               {member.avatar && (
-                <img
-                  src={member.avatar}
-                  alt={member.name_zh}
-                  className="h-40 w-full rounded-2xl object-cover"
-                />
+                <img src={member.avatar} alt={member.name_zh} className="h-40 w-full rounded-2xl object-cover" />
               )}
-              <h3 className="mt-4 font-display text-xl text-deep">{member.name_zh}</h3>
-              <p className="text-sm uppercase tracking-[0.3em] text-primary">
-                {member.position_zh || '表演者'}
-              </p>
-              <p className="mt-3 text-sm text-deep/70 line-clamp-3">{member.bio_zh}</p>
-            </article>
+              <div className="mt-6">
+                <p className="text-xs uppercase tracking-[0.4em] text-white/50">
+                  {member.position_zh || 'Performer'}
+                </p>
+                <h3 className="mt-2 font-display text-2xl text-white">{member.name_zh}</h3>
+                <p className="mt-3 text-sm text-white/70 line-clamp-3">{member.bio_zh}</p>
+              </div>
+            </motion.article>
           ))}
         </div>
       </div>

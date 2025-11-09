@@ -11,12 +11,15 @@ import GallerySection from './sections/GallerySection';
 import VideoShowcase from './sections/VideoShowcase';
 import MemberSpotlight from './sections/MemberSpotlight';
 import ContactCTA from './sections/ContactCTA';
+import MilestoneTimeline from './sections/MilestoneTimeline';
 import {
   fetchGallery,
   fetchHomeConfig,
   fetchLatestNews,
   fetchMembers,
   fetchVideos,
+  fetchContactInfo,
+  fetchMilestones,
   recordVisit,
   type Article,
   type Carousel,
@@ -25,6 +28,8 @@ import {
   type StatsConfig,
   type ImageItem,
   type VideoItem,
+  type ContactInfo,
+  type MilestoneEvent,
 } from './api/portal';
 
 const App = () => {
@@ -36,17 +41,21 @@ const App = () => {
   const [images, setImages] = useState<ImageItem[]>([]);
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [members, setMembers] = useState<MemberItem[]>([]);
+  const [contactInfo, setContactInfo] = useState<ContactInfo | null>(null);
+  const [milestones, setMilestones] = useState<MilestoneEvent[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const loadPortalData = async () => {
       try {
-        const [home, latestNews, gallery, videoList, memberList] = await Promise.all([
+        const [home, latestNews, gallery, videoList, memberList, contact, milestoneList] = await Promise.all([
           fetchHomeConfig(),
           fetchLatestNews(4),
           fetchGallery(6),
           fetchVideos(4),
           fetchMembers(true),
+          fetchContactInfo().catch(() => null),
+          fetchMilestones(8).catch(() => []),
         ]);
         setHero(home.hero);
         setStats(home.stats);
@@ -56,6 +65,8 @@ const App = () => {
         setImages(gallery);
         setVideos(videoList);
         setMembers(memberList);
+        setContactInfo(contact);
+        setMilestones(milestoneList);
       } catch (error) {
         console.error('Failed to load portal data', error);
       } finally {
@@ -80,18 +91,29 @@ const App = () => {
   if (loading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-[#f5f5f7] font-body text-deep">
+    <div className="cosmic-shell font-body text-[var(--color-text)]">
+      <div className="mesh-canvas" aria-hidden />
+      <div className="grid-overlay" aria-hidden />
       <Navbar links={quickNav} />
-      <main className="pt-20">
-        <Hero hero={hero} carousels={carousels} />
-        <StatsStrip stats={stats} />
-        <QuickNav items={quickNav.slice(0, 4)} />
-        <ShowcaseCarousel carousels={carousels} />
-        <NewsSection articles={news} />
-        <GallerySection images={images} />
-        <VideoShowcase videos={videos} />
-        <MemberSpotlight members={members} />
-        <ContactCTA />
+      <main className="relative z-10 space-y-0 pt-28">
+        <Hero hero={hero} carousels={carousels} quickNav={quickNav} stats={stats} />
+        {[
+          { key: 'stats', node: <StatsStrip stats={stats} /> },
+          { key: 'timeline', node: <MilestoneTimeline events={milestones} /> },
+          { key: 'quicknav', node: <QuickNav items={quickNav.slice(0, 6)} /> },
+          { key: 'showcase', node: <ShowcaseCarousel carousels={carousels} /> },
+          { key: 'news', node: <NewsSection articles={news} /> },
+          { key: 'gallery', node: <GallerySection images={images} /> },
+          { key: 'videos', node: <VideoShowcase videos={videos} /> },
+          { key: 'members', node: <MemberSpotlight members={members} /> },
+          { key: 'contact', node: <ContactCTA info={contactInfo} /> },
+        ].map((section, index, arr) => (
+          <div key={section.key} className="section-wrapper">
+            <div className="section-glow" aria-hidden />
+            {section.node}
+            {index < arr.length - 1 && <div className="section-connector" aria-hidden />}
+          </div>
+        ))}
       </main>
       <Footer />
     </div>

@@ -58,6 +58,30 @@ export type MemberItem = {
   avatar?: string;
 };
 
+export type ContactInfo = {
+  title?: string;
+  description?: string;
+  phone?: string;
+  email?: string;
+  wechat?: string;
+  locations?: string[];
+  tags?: string[];
+  cta_text?: string;
+  cta_link?: string;
+};
+
+export type MilestoneEvent = {
+  id: number;
+  title: string;
+  description?: string;
+  event_date: string;
+  location?: string;
+  highlight?: boolean;
+  sort_order?: number;
+  category?: string;
+  cover_url?: string;
+};
+
 export const fetchHomeConfig = async () => {
   const { data } = await apiClient.get('/portal/home/config');
   return data.data as {
@@ -102,4 +126,14 @@ export const recordVisit = async (payload: {
   } catch (error) {
     console.warn('Failed to record visit', error);
   }
+};
+
+export const fetchContactInfo = async () => {
+  const { data } = await apiClient.get('/portal/contact');
+  return data.data as ContactInfo;
+};
+
+export const fetchMilestones = async (limit = 8) => {
+  const { data } = await apiClient.get('/portal/milestones', { params: { limit } });
+  return data.data as MilestoneEvent[];
 };

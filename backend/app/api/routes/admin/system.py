@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from app.api.deps import SessionDep, get_current_admin
 from app.core.responses import SuccessResponse
 from app.db.models import Admin
+from app.schemas.contact import ContactInfo
 from app.schemas.system_config import SystemConfigOut, SystemConfigUpdate
 from app.services.crud_entities import system_config_crud
 from app.services.operation_log import record_operation
@@ -47,3 +48,25 @@ async def update_config(
     await session.commit()
     return SystemConfigOut.model_validate(config).model_dump()
 
+
+@router.get("/contact-info", response_class=SuccessResponse, summary="获取联系我们配置")
+async def get_contact_info(
+    session: SessionDep,
+    current_admin: Admin = Depends(get_current_admin),
+):
+    data = await get_config_value(session, "contact_info", default=ContactInfo().model_dump())
+    return ContactInfo.model_validate(data).model_dump()
+
+
+@router.put("/contact-info", response_class=SuccessResponse, summary="更新联系我们配置")
+async def update_contact_info(
+    payload: ContactInfo,
+    session: SessionDep,
+    current_admin: Admin = Depends(get_current_admin),
+):
+    await set_config_value(session, "contact_info", payload.model_dump())
+    await record_operation(
+        session, admin_id=current_admin.id, module="system", action="update_contact", content="contact_info"
+    )
+    await session.commit()
+    return payload.model_dump()

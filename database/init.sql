@@ -214,6 +214,24 @@ CREATE TABLE IF NOT EXISTS `visit_log` (
   KEY `idx_page` (`page_url`(255))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='访问日志表';
 
+-- 13. 里程碑事件表
+CREATE TABLE IF NOT EXISTS `milestone_event` (
+  `id` INT UNSIGNED NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+  `title` VARCHAR(200) NOT NULL COMMENT '事件标题',
+  `description` TEXT DEFAULT NULL COMMENT '事件描述',
+  `event_date` DATE NOT NULL COMMENT '事件日期',
+  `location` VARCHAR(200) DEFAULT NULL COMMENT '地点',
+  `highlight` TINYINT(1) DEFAULT 0 COMMENT '是否重点',
+  `sort_order` INT DEFAULT 0 COMMENT '排序权重',
+  `category` VARCHAR(100) DEFAULT NULL COMMENT '分类',
+  `cover_url` VARCHAR(500) DEFAULT NULL COMMENT '配图',
+  `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  PRIMARY KEY (`id`),
+  KEY `idx_event_date` (`event_date`),
+  KEY `idx_highlight_sort` (`highlight`, `sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='里程碑事件表';
+
 -- 插入初始数据
 
 -- 插入超级管理员 (密码: admin123456)
@@ -241,7 +259,7 @@ INSERT INTO `seo_config` (`page_key`, `title_zh`, `title_en`, `description_zh`, 
 -- 插入系统配置
 INSERT INTO `system_config` (`config_key`, `config_value`, `description`) VALUES
 ('site_info', '{"name_zh":"潮汕英歌舞","name_en":"Chaoshan Yingge Dance","logo":"","favicon":""}', '网站基本信息'),
-('contact', '{"phone":"","email":"","address_zh":"","address_en":"","latitude":"","longitude":""}', '联系方式'),
+('contact_info', '{"title":"预约演出 / 合作洽谈","description":"支持巡演、品牌定制演出、沉浸式发布会以及非遗研学课程，欢迎联系团队获取方案。","phone":"+86 138 0000 0000","email":"heritage@yingge.com","wechat":"yingge_official","locations":["汕头","深圳","上海","全球巡演"],"tags":["品牌共创","国际巡演","教育工作坊","沉浸体验"],"cta_text":"立即联系","cta_link":"mailto:heritage@yingge.com"}', '联系我们信息'),
 ('analytics', '{"baidu":"","google":""}', '统计代码'),
 ('filing', '{"icp":""}', '备案信息');
 

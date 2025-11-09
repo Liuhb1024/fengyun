@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 
 const Loader = () => (
-  <div className="flex min-h-screen items-center justify-center bg-deep text-white">
+  <div className="flex min-h-screen items-center justify-center bg-[#05060f] text-white">
     <motion.div
       className="flex items-center gap-3 font-display text-lg tracking-[0.3em]"
       initial={{ opacity: 0 }}
