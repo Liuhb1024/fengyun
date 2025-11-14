@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+﻿import { motion } from 'framer-motion';
 import SectionHeading from '../components/SectionHeading';
 
 type QuickLink = {
@@ -12,15 +12,34 @@ interface QuickNavProps {
   items: QuickLink[];
 }
 
+const scrollToAnchor = (link: string) => {
+  if (!link) return false;
+  const targetId = link.startsWith('#') ? link.slice(1) : link;
+  if (!targetId) return false;
+  const target = document.getElementById(targetId);
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    return true;
+  }
+  return false;
+};
+
 const QuickNav: React.FC<QuickNavProps> = ({ items }) => {
   if (!items?.length) return null;
 
   const handleClick = (item: QuickLink) => {
-    if (item.link_url.startsWith('#')) {
-      document.querySelector(item.link_url)?.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.open(item.link_url, item.is_external ? '_blank' : '_self');
+    const link = item.link_url?.trim();
+    if (!link) return;
+
+    const looksLikeUrl = /^[a-zA-Z]+:/.test(link) || link.startsWith('/');
+    if (!looksLikeUrl && scrollToAnchor(link)) {
+      return;
     }
+    if (link.startsWith('#') && scrollToAnchor(link)) {
+      return;
+    }
+
+    window.open(link, item.is_external ? '_blank' : '_self');
   };
 
   return (
@@ -29,10 +48,8 @@ const QuickNav: React.FC<QuickNavProps> = ({ items }) => {
         <div className="mb-10 flex flex-col gap-4 text-left md:flex-row md:items-end md:justify-between">
           <SectionHeading
             eyebrow="Immersive Chapters"
-            title={'\u5206\u955C\u5F0F\u53D9\u4E8B'}
-            description={
-              '\u4ECE\u8D77\u6E90\u3001\u9635\u5217\u3001\u566A\u95F4\u5230\u4EBA\u4F53\u4E92\u52A8\uFF0C\u6309\u7AE0\u8282\u63A2\u7D22\u82F1\u6B4C\u821E\u7684\u7CBE\u795E\u8F68\u8FF9\uFF1B\u6BCF\u4E00\u7AD9\u5747\u53EF\u76F4\u8FBE\u9875\u9762\u951A\u70B9\u6216\u4E13\u9898\u6587\u7AE0\u3002'
-            }
+            title="分镜式叙事"
+            description="从起源、阵列、噪环到人机互动，按章节探索英歌舞的精神轨迹；每一站均可直达页面锚点或专题文章。"
           />
           <span className="text-xs uppercase tracking-[0.4em] text-white/50">Scroll to navigate</span>
         </div>
@@ -50,7 +67,7 @@ const QuickNav: React.FC<QuickNavProps> = ({ items }) => {
               <p className="text-xs uppercase tracking-[0.4em] text-white/60">0{idx + 1}</p>
               <h3 className="mt-4 font-display text-2xl">{item.name}</h3>
               <p className="mt-6 text-sm uppercase tracking-[0.4em] text-[var(--color-accent)]">
-                {item.is_external ? 'External' : 'Internal'} {'\u00B7'} Tap {'\u2192'}
+                {item.is_external ? 'External' : 'Internal'} · Tap →
               </p>
             </motion.button>
           ))}
