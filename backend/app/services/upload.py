@@ -26,7 +26,8 @@ ACCEPT_MIME_PREFIX = {
     "avatars": ("image/",),
     "carousels": ("image/",),
     "images": ("image/",),
-    "videos": ("video/",),
+    # 视频封面通常是图片，这里允许 video/ 和 image/ 两种前缀
+    "videos": ("video/", "image/"),
     "audios": ("audio/",),
 }
 
