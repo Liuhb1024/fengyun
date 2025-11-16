@@ -46,6 +46,7 @@ async def update_config(
         session, admin_id=current_admin.id, module="system", action="update_config", content=config_key
     )
     await session.commit()
+    await session.refresh(config)
     return SystemConfigOut.model_validate(config).model_dump()
 
 

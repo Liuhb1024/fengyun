@@ -4,8 +4,6 @@ import Loader from './components/Loader';
 import Footer from './components/Footer';
 import Hero from './sections/Hero';
 import StatsStrip from './sections/StatsStrip';
-import QuickNav from './sections/QuickNav';
-import ShowcaseCarousel from './sections/ShowcaseCarousel';
 import NewsSection from './sections/NewsSection';
 import GallerySection from './sections/GallerySection';
 import VideoShowcase from './sections/VideoShowcase';
@@ -100,8 +98,6 @@ const App = () => {
         {[
           { key: 'stats', node: <StatsStrip stats={stats} /> },
           { key: 'timeline', node: <MilestoneTimeline events={milestones} /> },
-          { key: 'quicknav', node: <QuickNav items={quickNav.slice(0, 6)} /> },
-          { key: 'showcase', node: <ShowcaseCarousel carousels={carousels} /> },
           { key: 'news', node: <NewsSection articles={news} /> },
           { key: 'gallery', node: <GallerySection images={images} /> },
           { key: 'videos', node: <VideoShowcase videos={videos} /> },

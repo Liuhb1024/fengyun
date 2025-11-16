@@ -1,4 +1,5 @@
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import type { Carousel, HeroConfig, StatsConfig } from '../api/portal';
 
 type QuickLink = {
@@ -23,7 +24,26 @@ const Hero: React.FC<HeroProps> = ({ hero, carousels, quickNav, stats }) => {
     { label: '\u5E74\u5EA6\u6F14\u51FA', value: stats?.performances ? `${stats.performances}+` : undefined },
   ].filter((item) => item.value);
 
-  const accents = quickNav.slice(0, 3);
+  const sliderItems = useMemo(() => {
+    if (carousels?.length) return carousels.slice(0, 5);
+    return quickNav.slice(0, 5).map((item) => ({
+      id: item.id,
+      image_url: '',
+      title_zh: item.name,
+      link_url: item.link_url,
+      is_external: item.is_external,
+    })) as Carousel[];
+  }, [carousels, quickNav]);
+
+  const [activeIndex, setActiveIndex] = useState(0);
+
+  useEffect(() => {
+    if (!sliderItems.length) return undefined;
+    const timer = setInterval(() => {
+      setActiveIndex((prev) => (prev + 1) % sliderItems.length);
+    }, 5200);
+    return () => clearInterval(timer);
+  }, [sliderItems]);
 
   const onPrimaryClick = () => {
     if (hero?.cta_link?.startsWith('#')) {
@@ -64,7 +84,7 @@ const Hero: React.FC<HeroProps> = ({ hero, carousels, quickNav, stats }) => {
           className="space-y-8"
         >
           <div className="accent-chip">
-            <span>{hero?.title_en || 'CHAOSHAN YINGGE'}</span>
+            <span>{hero?.title_en || 'FENGYUN YINGGE'}</span>
           </div>
           <h1 className="text-4xl font-semibold leading-tight tracking-[0.08em] text-white md:text-6xl">
             <span className="gradient-text">
@@ -94,48 +114,81 @@ const Hero: React.FC<HeroProps> = ({ hero, carousels, quickNav, stats }) => {
           </div>
         </motion.div>
 
-        <motion.div
-          initial={{ opacity: 0, x: 40 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.15, duration: 0.8 }}
-          className="card-surface soft-shadow rounded-[32px] border border-[rgba(246,208,124,0.2)] p-8"
-        >
-          <p className="text-xs uppercase tracking-[0.5em] text-white/60">Live Chapters</p>
-          <div className="mt-4 space-y-3">
-            {accents.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => {
-                  if (item.link_url.startsWith('#')) {
-                    document.querySelector(item.link_url)?.scrollIntoView({ behavior: 'smooth' });
-                  } else {
-                    window.open(item.link_url, item.is_external ? '_blank' : '_self');
-                  }
-                }}
-                className="flex w-full items-center justify-between rounded-2xl border border-[rgba(246,208,124,0.25)] bg-[rgba(20,10,6,0.75)] px-4 py-3 text-left transition hover:border-[var(--color-accent)]"
-              >
-                <span className="font-display text-lg">{item.name}</span>
-                <span className="text-xs uppercase tracking-[0.4em] text-white/60">GO</span>
-              </button>
-            ))}
-          </div>
-          <div className="mt-6 h-px w-full bg-white/10" />
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
-            {heroStats.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-2xl border border-[rgba(246,208,124,0.25)] bg-[rgba(20,10,6,0.72)] p-4"
-              >
-                <p className="text-xs uppercase tracking-[0.4em] text-white/60">{stat.label}</p>
-                <p className="mt-2 font-display text-2xl text-white">{stat.value}</p>
+        <div className="relative rounded-[34px] p-[2px] bg-gradient-to-br from-[rgba(246,208,124,0.85)] via-[rgba(214,66,50,0.55)] to-[rgba(246,208,124,0.85)] shadow-[0_20px_60px_rgba(0,0,0,0.35)]">
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.15, duration: 0.8 }}
+            className="card-surface soft-shadow rounded-[32px] border border-[rgba(246,208,124,0.12)] bg-[rgba(12,6,5,0.78)] p-8"
+          >
+            <div className="overflow-hidden rounded-2xl border border-[rgba(246,208,124,0.2)] bg-[rgba(20,10,6,0.75)]">
+              <div className="relative h-72">
+                <AnimatePresence mode="wait">
+                  {sliderItems.length > 0 && (
+                    <motion.div
+                      key={sliderItems[activeIndex]?.id ?? activeIndex}
+                      className="absolute inset-0 overflow-hidden rounded-2xl"
+                      initial={{ opacity: 0, scale: 1.02 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, scale: 0.98 }}
+                      transition={{ duration: 0.6, ease: [0.33, 1, 0.68, 1] }}
+                    >
+                      <div
+                        className="absolute inset-0 bg-cover bg-center scale-[1] origin-center"
+                        style={{
+                          backgroundImage: sliderItems[activeIndex]?.image_url
+                            ? `url(${sliderItems[activeIndex]?.image_url})`
+                            : 'radial-gradient(circle at 30% 30%, rgba(247,200,90,0.18), transparent 45%), radial-gradient(circle at 70% 60%, rgba(214,66,50,0.18), transparent 40%), linear-gradient(135deg, rgba(20,10,6,0.9), rgba(15,8,6,0.8))',
+                        }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-b from-[rgba(8,6,12,0.12)] via-[rgba(8,6,12,0.48)] to-[rgba(8,6,12,0.82)]" />
+                      <div className="absolute inset-x-0 bottom-0 flex flex-col gap-1 p-3 pb-5 text-white">
+                        <p className="text-[11px] uppercase tracking-[0.4em] text-white/60">Yingge Highlights</p>
+                        <h4 className="font-display text-xl leading-tight">
+                          {sliderItems[activeIndex]?.title_zh || '英歌瞬间'}
+                        </h4>
+                        {sliderItems[activeIndex]?.link_url && (
+                          <div className="flex items-center justify-end">
+                            <button
+                              type="button"
+                              className="rounded-full border border-[rgba(246,208,124,0.35)] px-3 py-1 text-[11px] text-white transition hover:border-[var(--color-accent)] hover:text-[var(--color-accent)]"
+                              onClick={() => {
+                                const link = sliderItems[activeIndex]?.link_url;
+                                if (!link) return;
+                                if (link.startsWith('#')) {
+                                  document.querySelector(link)?.scrollIntoView({ behavior: 'smooth' });
+                                } else {
+                                  window.open(link, sliderItems[activeIndex]?.is_external ? '_blank' : '_self');
+                                }
+                              }}
+                            >
+                              Explore
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+                <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">
+                  {sliderItems.map((item, idx) => (
+                    <button
+                      key={item.id ?? idx}
+                      type="button"
+                      aria-label={`slide ${idx + 1}`}
+                      onClick={() => setActiveIndex(idx)}
+                      className={`h-2 w-6 rounded-full transition ${
+                        idx === activeIndex
+                          ? 'bg-[var(--color-accent)] shadow-[0_0_10px_rgba(247,200,90,0.6)] scale-110'
+                          : 'bg-white/25 hover:bg-white/50'
+                      }`}
+                    />
+                  ))}
+                </div>
               </div>
-            ))}
-          </div>
-          <div className="mt-6 text-xs uppercase tracking-[0.5em] text-white/50">
-            SCROLL TO ENTER · {'\u6EDA\u52A8\u8FDB\u5165\u573A\u666F'}
-          </div>
-        </motion.div>
+            </div>
+          </motion.div>
+        </div>
       </div>
     </section>
   );
