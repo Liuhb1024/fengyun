@@ -16,10 +16,13 @@ async def list_articles(
     page: int = 1,
     page_size: int = 10,
     category: str | None = None,
+    tag: str | None = None,
 ):
     base_stmt = select(Article).where(Article.is_published.is_(True))
     if category:
         base_stmt = base_stmt.where(Article.category == category)
+    if tag:
+        base_stmt = base_stmt.where(Article.tags.contains([tag]))
     count_stmt = select(func.count()).select_from(base_stmt.subquery())
     total = (await session.execute(count_stmt)).scalar_one() or 0
     data_stmt = (

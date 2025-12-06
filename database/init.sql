@@ -106,6 +106,8 @@ CREATE TABLE IF NOT EXISTS `article` (
   `summary_zh` VARCHAR(500) DEFAULT NULL COMMENT '中文摘要',
   `summary_en` VARCHAR(500) DEFAULT NULL COMMENT '英文摘要',
   `category` VARCHAR(50) DEFAULT NULL COMMENT '分类',
+  `tags` JSON DEFAULT NULL COMMENT '标签列表(JSON array)',
+  `content_format` VARCHAR(20) NOT NULL DEFAULT 'html' COMMENT '正文格式: html/markdown',
   `view_count` INT DEFAULT 0 COMMENT '阅读量',
   `seo_keywords` VARCHAR(200) DEFAULT NULL COMMENT 'SEO关键词',
   `publish_at` DATETIME DEFAULT NULL COMMENT '发布时间',

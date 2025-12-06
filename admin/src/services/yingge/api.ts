@@ -136,6 +136,14 @@ export const articleAPI = {
     request<ApiResponse<Record<string, unknown>>>(`/admin/articles/${id}/publish`, { method: 'POST' }),
   remove: (id: number) =>
     request<ApiResponse<Record<string, unknown>>>(`/admin/articles/${id}`, { method: 'DELETE' }),
+  tags: () => unwrap(request<ApiResponse<{ items: string[] }>>('/admin/articles/tags')),
+  importWechat: (url: string) =>
+    unwrap(
+      request<ApiResponse<Partial<ArticleItem>>>('/admin/articles/import-wechat', {
+        method: 'POST',
+        params: { url },
+      }),
+    ),
 };
 
 export const memberAPI = {
@@ -277,11 +285,18 @@ export type ArticleItem = {
   id: number;
   title_zh: string;
   category?: string;
+  tags?: string[];
   summary_zh?: string;
+  summary_en?: string;
   cover_url?: string;
+  content_zh?: string;
+  content_en?: string;
+  content_format?: 'html' | 'markdown';
   publish_at?: string;
   is_published?: boolean;
   view_count?: number;
+  created_at?: string;
+  updated_at?: string;
 };
 
 export type MemberItem = {
