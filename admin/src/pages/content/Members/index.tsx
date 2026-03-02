@@ -4,18 +4,20 @@ import {
   PageContainer,
   ProColumns,
   ProFormDigit,
+  ProFormInstance,
   ProFormSwitch,
   ProFormText,
   ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm } from 'antd';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { MemberItem } from '@/services/yingge';
 import { memberAPI } from '@/services/yingge';
 
 const MemberPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
+  const formRef = useRef<ProFormInstance<MemberItem>>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<MemberItem | undefined>();
 
@@ -67,6 +69,15 @@ const MemberPage: React.FC = () => {
     },
   ];
 
+  useEffect(() => {
+    if (!open) return;
+    if (editing) {
+      formRef.current?.setFieldsValue(editing);
+    } else {
+      formRef.current?.resetFields();
+    }
+  }, [open, editing]);
+
   return (
     <PageContainer>
       <ProTable<MemberItem>
@@ -91,8 +102,14 @@ const MemberPage: React.FC = () => {
       <ModalForm<MemberItem>
         title={editing ? '编辑成员' : '新增成员'}
         open={open}
-        initialValues={editing}
-        onOpenChange={setOpen}
+        formRef={formRef}
+        modalProps={{ destroyOnClose: true }}
+        onOpenChange={(visible) => {
+          setOpen(visible);
+          if (!visible) {
+            setEditing(undefined);
+          }
+        }}
         onFinish={async (values) => {
           await submit(values);
           return true;

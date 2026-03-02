@@ -3,6 +3,7 @@ import {
   ModalForm,
   PageContainer,
   ProFormDigit,
+  ProFormInstance,
   ProFormSelect,
   ProFormSwitch,
   ProFormText,
@@ -11,12 +12,13 @@ import {
 import { useRequest } from '@umijs/max';
 import { Button, Popconfirm, Tree } from 'antd';
 import type { DataNode } from 'antd/es/tree';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { NavigationItem, NavigationTree } from '@/services/yingge';
 import { navigationAPI } from '@/services/yingge';
 
 const NavigationPage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
+  const formRef = useRef<ProFormInstance<NavigationItem>>(null);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<NavigationItem | undefined>();
   const { data: treeData, refresh } = useRequest<NavigationTree[]>(() => navigationAPI.tree());
@@ -49,6 +51,15 @@ const NavigationPage: React.FC = () => {
       title: node.name_zh,
       children: convertTree(node.children || []),
     }));
+
+  useEffect(() => {
+    if (!open) return;
+    if (editing) {
+      formRef.current?.setFieldsValue(editing);
+    } else {
+      formRef.current?.resetFields();
+    }
+  }, [open, editing]);
 
   return (
     <PageContainer
@@ -117,8 +128,14 @@ const NavigationPage: React.FC = () => {
       <ModalForm<NavigationItem>
         title={editing ? '编辑导航' : '新增导航'}
         open={open}
-        initialValues={editing}
-        onOpenChange={setOpen}
+        formRef={formRef}
+        modalProps={{ destroyOnClose: true }}
+        onOpenChange={(visible) => {
+          setOpen(visible);
+          if (!visible) {
+            setEditing(undefined);
+          }
+        }}
         onFinish={async (values) => {
           await submit(values);
           return true;

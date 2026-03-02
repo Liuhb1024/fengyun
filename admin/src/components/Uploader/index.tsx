@@ -1,8 +1,8 @@
 import { CloudUploadOutlined, DeleteOutlined, ReloadOutlined } from '@ant-design/icons';
-import { App, Button, Space, Upload } from 'antd';
+import { App, Button, Progress, Space, Upload } from 'antd';
 import type { UploadProps } from 'antd';
-import React from 'react';
-import { uploadAPI } from '@/services/yingge';
+import React, { useState } from 'react';
+import { getApiBaseUrl, getToken } from '@/utils/token';
 
 type Props = {
   value?: string;
@@ -15,6 +15,59 @@ type Props = {
   tips?: string;
 };
 
+type ApiResponse<T> = {
+  code: number;
+  message: string;
+  data: T;
+};
+
+type UploadResult = {
+  url: string;
+  thumbnail_url?: string;
+  file_size?: number;
+};
+
+const uploadWithProgress = (
+  file: File,
+  category: string,
+  onProgress: (percent: number) => void,
+) =>
+  new Promise<UploadResult>((resolve, reject) => {
+    const baseUrl = getApiBaseUrl().replace(/\/$/, '');
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', `${baseUrl}/admin/upload`, true);
+    const token = getToken();
+    if (token) {
+      xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+    }
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable) return;
+      const percent = Math.round((event.loaded / event.total) * 100);
+      onProgress(percent);
+    };
+    xhr.onload = () => {
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(new Error(`上传失败，状态码：${xhr.status}`));
+        return;
+      }
+      try {
+        const payload = JSON.parse(xhr.responseText) as ApiResponse<UploadResult>;
+        if (payload?.code && payload.code !== 200) {
+          reject(new Error(payload.message || '上传失败'));
+          return;
+        }
+        resolve(payload.data);
+      } catch (error) {
+        reject(new Error('解析上传响应失败'));
+      }
+    };
+    xhr.onerror = () => reject(new Error('网络异常，上传失败'));
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('category', category);
+    xhr.send(formData);
+  });
+
 const Uploader: React.FC<Props> = ({
   value,
   onChange,
@@ -26,6 +79,8 @@ const Uploader: React.FC<Props> = ({
   tips,
 }) => {
   const { message } = App.useApp();
+  const [uploading, setUploading] = useState(false);
+  const [percent, setPercent] = useState<number | null>(null);
 
   const customRequest: UploadProps['customRequest'] = async ({ file, onSuccess, onError }) => {
     try {
@@ -35,13 +90,21 @@ const Uploader: React.FC<Props> = ({
         onError?.(new Error('File too large'));
         return;
       }
-      const result = await uploadAPI.upload(uploadFile, category);
+      setUploading(true);
+      setPercent(0);
+      const result = await uploadWithProgress(uploadFile, category, (next) => {
+        setPercent(next);
+      });
       onChange?.(result.url);
       onSuccess?.(result);
+      setPercent(100);
       message.success('上传成功');
     } catch (error) {
       message.error('上传失败，请重试');
       onError?.(error as Error);
+    } finally {
+      setUploading(false);
+      setTimeout(() => setPercent(null), 800);
     }
   };
 
@@ -140,6 +203,11 @@ const Uploader: React.FC<Props> = ({
             <div style={{ color: '#bbb', fontSize: 12 }}>大小不超过 {maxSizeMB}MB</div>
           </div>
         </Upload>
+      )}
+      {percent !== null && (
+        <div style={{ marginTop: 12 }}>
+          <Progress percent={percent} size="small" status={uploading ? 'active' : 'success'} />
+        </div>
       )}
       {value && renderPreview()}
     </div>

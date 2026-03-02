@@ -25,7 +25,7 @@ const config: Parameters<typeof defineConfig>[0] = {
   locale: {
     default: 'zh-CN',
     antd: true,
-    baseNavigator: true,
+    baseNavigator: false,
   },
   antd: {
     appConfig: {},

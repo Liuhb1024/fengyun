@@ -14,15 +14,21 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Input, Popconfirm, Radio, Space, Tag, message } from 'antd';
+import DOMPurify from 'dompurify';
 import React, { useEffect, useRef, useState } from 'react';
 import type { ArticleItem } from '@/services/yingge';
-import { articleAPI, uploadAPI } from '@/services/yingge';
+import { articleAPI } from '@/services/yingge';
 import Uploader from '@/components/Uploader';
 
 type ArticleFormValues = Partial<ArticleItem> & {
   cover_mode?: 'upload' | 'link';
   wechat_url?: string;
 };
+
+const sanitizeHtml = (raw: string) =>
+  DOMPurify.sanitize(raw, {
+    USE_PROFILES: { html: true },
+  });
 
 const ArticlePage: React.FC = () => {
   const actionRef = useRef<ActionType>(null);
@@ -302,17 +308,25 @@ const ArticlePage: React.FC = () => {
           fieldProps={{ rows: 12, placeholder: '支持粘贴富文本/HTML，或自行输入并排版' }}
         />
         <ProForm.Item label="正文预览">
-          <div
-            style={{
-              border: '1px solid var(--ant-color-border-secondary, #f0f0f0)',
-              borderRadius: 8,
-              padding: 12,
-              maxHeight: 260,
-              overflow: 'auto',
-              background: '#fafafa',
+          <ProFormDependency name={['content_zh']}>
+            {({ content_zh }) => {
+              const raw = content_zh || '<p>暂无内容</p>';
+              const safeHtml = sanitizeHtml(raw);
+              return (
+                <div
+                  style={{
+                    border: '1px solid var(--ant-color-border-secondary, #f0f0f0)',
+                    borderRadius: 8,
+                    padding: 12,
+                    maxHeight: 260,
+                    overflow: 'auto',
+                    background: '#fafafa',
+                  }}
+                  dangerouslySetInnerHTML={{ __html: safeHtml }}
+                />
+              );
             }}
-            dangerouslySetInnerHTML={{ __html: formRef.current?.getFieldValue('content_zh') || '<p>暂无内容</p>' }}
-          />
+          </ProFormDependency>
         </ProForm.Item>
         <ProFormDateTimePicker name="publish_at" label="发布时间" />
         <ProFormSwitch name="is_published" label="立即发布" />

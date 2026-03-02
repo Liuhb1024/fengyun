@@ -289,7 +289,7 @@ export const layout: RunTimeLayoutConfig = ({ initialState, setInitialState }) =
         return;
       }
       if (!initialState?.currentUser && location.pathname !== loginPath && hasToken) {
-        // 绛夊緟鐢ㄦ埛淇℃伅鍔犺浇锛屾棤闇€寮哄埗璺宠浆
+        // 等待用户信息加载完成，避免重复跳转
         return;
       }
       if (

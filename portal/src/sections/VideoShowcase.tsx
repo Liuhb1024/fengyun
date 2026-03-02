@@ -8,9 +8,14 @@ interface VideoShowcaseProps {
   videos: VideoItem[];
 }
 
+const CARD_HEIGHT = 200;
+const CARD_WIDTH = 260;
+const GAP_PX = 16;
+
 const VideoShowcase: React.FC<VideoShowcaseProps> = ({ videos }) => {
   const [activeCategory, setActiveCategory] = useState<string>('全部');
   const [current, setCurrent] = useState<VideoItem | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     if (current) {
@@ -40,10 +45,15 @@ const VideoShowcase: React.FC<VideoShowcaseProps> = ({ videos }) => {
   );
 
   if (!filtered.length) return null;
-  const [hero, ...rest] = filtered;
-  const displayList = rest.length ? rest : videos.slice(1);
 
   const onPlay = (video: VideoItem) => setCurrent(video);
+
+  const baseItems = filtered.slice(0, 10).length ? filtered.slice(0, 10) : filtered;
+  const repeatCount =
+    baseItems.length >= 6 ? 2 : baseItems.length >= 3 ? 3 : baseItems.length >= 2 ? 4 : 6;
+  const stripItems = Array.from({ length: repeatCount }, () => baseItems).flat();
+  const shiftDistance = baseItems.length * (CARD_WIDTH + GAP_PX);
+  const trackWidth = stripItems.length * (CARD_WIDTH + GAP_PX);
 
   return (
     <section id="videos" className="px-6 py-24">
@@ -51,7 +61,8 @@ const VideoShowcase: React.FC<VideoShowcaseProps> = ({ videos }) => {
         <SectionHeading
           eyebrow="Video Archive"
           title="英歌影像精选"
-          description="灯箱主推 + 纵向列表，沉浸观看英歌舞的鼓点、阵列与舞步。"
+          description="横向胶片带自动滑动，像翻阅光盘盒一样连续浏览表演瞬间。"
+          align="center"
         />
 
         <div className="flex flex-wrap justify-center gap-3 text-sm">
@@ -71,74 +82,72 @@ const VideoShowcase: React.FC<VideoShowcaseProps> = ({ videos }) => {
           ))}
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-[1.3fr,0.7fr]">
-          <motion.article
-            key={hero.id}
-            initial={{ opacity: 0, scale: 0.97 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.5 }}
-            viewport={{ once: true, amount: 0.4 }}
-            className="relative overflow-hidden rounded-[32px] border border-[rgba(246,208,124,0.16)] bg-[rgba(12,6,5,0.78)] shadow-[0_30px_90px_rgba(0,0,0,0.55)]"
-          >
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_25%,rgba(246,208,124,0.12),transparent_40%),radial-gradient(circle_at_80%_60%,rgba(214,66,50,0.08),transparent_40%)]" />
-            <img
-              src={hero.cover_url || '/video-cover.jpg'}
-              alt={hero.title_zh}
-              className="h-[380px] w-full object-cover"
-              loading="lazy"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[rgba(0,0,0,0.8)] via-[rgba(0,0,0,0.35)] to-transparent" />
-            <button
-              type="button"
-              onClick={() => onPlay(hero)}
-              className="absolute left-6 top-6 flex h-16 w-16 items-center justify-center rounded-full bg-[var(--color-accent)] text-black shadow-lg transition hover:scale-105"
-            >
-              <FaPlay />
-            </button>
-            <div className="absolute bottom-0 left-0 right-0 p-8 text-white">
-              <p className="text-xs uppercase tracking-[0.3em] text-[var(--color-accent)]">{hero.category || 'performance'}</p>
-              <h3 className="mt-2 font-display text-3xl">{hero.title_zh}</h3>
-              <div className="mt-3 flex items-center gap-3 text-xs uppercase tracking-[0.35em] text-white/70">
-                {hero.duration && <span className="rounded-full bg-white/15 px-3 py-1">{hero.duration}s</span>}
-                <span className="rounded-full border border-white/15 bg-[rgba(12,6,5,0.55)] px-3 py-1">播放</span>
-              </div>
-            </div>
-          </motion.article>
+        <div className="relative overflow-hidden rounded-[22px] bg-gradient-to-r from-[rgba(12,6,5,0.45)] via-[rgba(12,6,5,0.3)] to-[rgba(12,6,5,0.45)]">
+          <div className="pointer-events-none absolute left-0 top-0 z-10 h-full w-16 bg-gradient-to-r from-[var(--color-bg,#05060f)] to-transparent" />
+          <div className="pointer-events-none absolute right-0 top-0 z-10 h-full w-16 bg-gradient-to-l from-[var(--color-bg,#05060f)] to-transparent" />
 
-          <div className="space-y-3 rounded-[24px] border border-white/10 bg-[rgba(6,6,15,0.7)] p-4">
-            {displayList.map((video, index) => (
-              <motion.button
-                type="button"
-                key={video.id}
-                onClick={() => onPlay(video)}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.04 }}
-                viewport={{ once: true, amount: 0.3 }}
-                className="group flex gap-4 rounded-[18px] border border-[rgba(246,208,124,0.16)] bg-[rgba(12,6,5,0.6)] p-3 text-left shadow-[0_10px_30px_rgba(0,0,0,0.35)] transition hover:border-[var(--color-accent)]"
-              >
-                <div className="relative h-20 w-32 overflow-hidden rounded-[14px]">
-                  <img
-                    src={video.cover_url || '/video-cover.jpg'}
-                    alt={video.title_zh}
-                    className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent to-[rgba(0,0,0,0.55)]" />
-                  <div className="pointer-events-none absolute right-2 top-2 rounded-full bg-[rgba(0,0,0,0.6)] px-2 py-0.5 text-[11px] text-white">
-                    {video.duration ? `${video.duration}s` : 'PLAY'}
+          <motion.div
+            className="flex py-4"
+            style={{ width: `${trackWidth}px`, columnGap: `${GAP_PX}px` }}
+            animate={baseItems.length > 1 && !isPaused ? { x: [0, -shiftDistance] } : undefined}
+            transition={{ duration: 30, ease: 'linear', repeat: Infinity }}
+          >
+            {stripItems.map((video, index) => {
+              const tilt = (index % 2 === 0 ? -3 : 3) + (index % 5 === 0 ? 1 : 0);
+              const cardNumber = ((index % baseItems.length) + 1).toString().padStart(2, '0');
+              return (
+                <motion.button
+                  type="button"
+                  key={`${video.id}-${index}`}
+                  onClick={() => onPlay(video)}
+                  initial={{ opacity: 0, y: 14 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  whileHover={{
+                    rotate: 0,
+                    y: -10,
+                    boxShadow: '0 24px 60px rgba(0,0,0,0.55)',
+                  }}
+                  transition={{ delay: Math.min(index * 0.02, 0.3) }}
+                  viewport={{ once: true, amount: 0.3 }}
+                  className="relative flex-shrink-0 overflow-hidden rounded-[20px] border border-[rgba(246,208,124,0.14)] bg-[rgba(12,6,5,0.76)] shadow-[0_16px_44px_rgba(0,0,0,0.48)] backdrop-blur-xl"
+                  style={{ width: `${CARD_WIDTH}px`, height: `${CARD_HEIGHT}px`, rotate: `${tilt}deg` }}
+                  onMouseEnter={() => setIsPaused(true)}
+                  onMouseLeave={() => setIsPaused(false)}
+                >
+                  <div className="absolute inset-0 rounded-[20px] bg-[radial-gradient(circle_at_20%_20%,rgba(246,208,124,0.08),transparent_45%),radial-gradient(circle_at_80%_60%,rgba(214,66,50,0.06),transparent_40%)] mix-blend-screen opacity-80" />
+                  <div className="absolute inset-0 rounded-[20px] bg-gradient-to-b from-[rgba(8,6,12,0.1)] via-[rgba(8,6,12,0.28)] to-[rgba(8,6,12,0.7)]" />
+
+                  <div className="relative h-full w-full overflow-hidden rounded-[18px]">
+                    <img
+                      src={video.cover_url || '/video-cover.jpg'}
+                      alt={video.title_zh}
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
+                    <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[rgba(0,0,0,0.05)] via-[rgba(0,0,0,0.25)] to-[rgba(0,0,0,0.6)]" />
                   </div>
-                </div>
-                <div className="flex flex-1 flex-col justify-center">
-                  <p className="text-[11px] uppercase tracking-[0.3em] text-white/60">{video.category || 'clip'}</p>
-                  <h4 className="mt-1 text-base font-semibold text-white line-clamp-2">{video.title_zh}</h4>
-                </div>
-                <div className="flex items-center">
-                  <span className="text-[var(--color-accent)] transition group-hover:translate-x-0.5">▶</span>
-                </div>
-              </motion.button>
-            ))}
-          </div>
+
+                  <div className="absolute inset-x-0 bottom-0 p-4">
+                    <div className="flex items-center justify-between text-[11px] uppercase tracking-[0.3em] text-white/70">
+                      <span className="rounded-full border border-white/15 bg-[rgba(12,6,5,0.6)] px-3 py-1 text-[10px]">
+                        {video.category || 'clip'}
+                      </span>
+                      <span className="rounded-full border border-white/15 bg-[rgba(12,6,5,0.55)] px-2 py-1 text-[11px]">
+                        {video.duration ? `${video.duration}s` : cardNumber}
+                      </span>
+                    </div>
+                    <h4 className="mt-2 font-display text-lg text-white line-clamp-2 drop-shadow-[0_2px_10px_rgba(0,0,0,0.45)]">
+                      {video.title_zh}
+                    </h4>
+                  </div>
+
+                  <span className="absolute right-3 top-3 flex h-10 w-10 items-center justify-center rounded-full border border-[rgba(246,208,124,0.35)] bg-[rgba(0,0,0,0.55)] text-[var(--color-accent)] shadow-[0_0_18px_rgba(246,208,124,0.35)] backdrop-blur">
+                    <FaPlay />
+                  </span>
+                </motion.button>
+              );
+            })}
+          </motion.div>
         </div>
       </div>
 

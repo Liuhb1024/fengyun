@@ -70,47 +70,53 @@ const SystemSettings: React.FC = () => {
   });
 
   const handleSubmit = async (values: Record<string, any>) => {
-    await systemAPI.update('site_info', {
-      config_value: JSON.stringify({
-        name_zh: values.site_name_zh,
-        name_en: values.site_name_en,
-        phone: values.contact_phone,
-        email: values.contact_email,
-      }),
-    });
-    await systemAPI.update('home_hero', {
-      config_value: JSON.stringify(
-        {
-          video_url: values.hero_video_url,
-          title_zh: values.hero_title_zh,
-          subtitle_zh: values.hero_subtitle_zh,
-          cta_text_zh: values.hero_cta_text,
-          cta_link: values.hero_cta_link,
-        },
-        null,
-        0,
-      ),
-    });
-    await systemAPI.update('home_stats', {
-      config_value: JSON.stringify({
-        founded_year: values.stat_year,
-        members: values.stat_members,
-        performances: values.stat_performances,
-      }),
-    });
-    await systemAPI.updateContactInfo({
-      title: values.contact_title,
-      description: values.contact_description,
-      phone: values.contact_phone,
-      email: values.contact_email,
-      wechat: values.contact_wechat,
-      locations: (values.contact_locations || []).filter((item: string) => item && item.trim()),
-      tags: (values.contact_tags || []).filter((item: string) => item && item.trim()),
-      cta_text: values.contact_cta_text,
-      cta_link: values.contact_cta_link,
-    });
-    message.success('更新成功');
-    refresh();
+    try {
+      await Promise.all([
+        systemAPI.update('site_info', {
+          config_value: JSON.stringify({
+            name_zh: values.site_name_zh,
+            name_en: values.site_name_en,
+            phone: values.contact_phone,
+            email: values.contact_email,
+          }),
+        }),
+        systemAPI.update('home_hero', {
+          config_value: JSON.stringify(
+            {
+              video_url: values.hero_video_url,
+              title_zh: values.hero_title_zh,
+              subtitle_zh: values.hero_subtitle_zh,
+              cta_text_zh: values.hero_cta_text,
+              cta_link: values.hero_cta_link,
+            },
+            null,
+            0,
+          ),
+        }),
+        systemAPI.update('home_stats', {
+          config_value: JSON.stringify({
+            founded_year: values.stat_year,
+            members: values.stat_members,
+            performances: values.stat_performances,
+          }),
+        }),
+        systemAPI.updateContactInfo({
+          title: values.contact_title,
+          description: values.contact_description,
+          phone: values.contact_phone,
+          email: values.contact_email,
+          wechat: values.contact_wechat,
+          locations: (values.contact_locations || []).filter((item: string) => item && item.trim()),
+          tags: (values.contact_tags || []).filter((item: string) => item && item.trim()),
+          cta_text: values.contact_cta_text,
+          cta_link: values.contact_cta_link,
+        }),
+      ]);
+      message.success('更新成功');
+      refresh();
+    } catch (error) {
+      message.error('更新失败，请稍后重试');
+    }
   };
 
   return (

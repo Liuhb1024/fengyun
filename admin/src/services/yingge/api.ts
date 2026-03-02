@@ -218,19 +218,6 @@ export const statsAPI = {
   logs: (params?: PageParams) => listRequest<OperationLogItem>('/admin/logs/operations', params),
 };
 
-export const uploadAPI = {
-  upload: (file: File, category: string = 'general') => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('category', category);
-    return unwrap(
-      request<ApiResponse<UploadResult>>('/admin/upload', {
-        method: 'POST',
-        data: formData,
-      }),
-    );
-  },
-};
 
 export type CarouselItem = {
   id: number;
@@ -421,10 +408,4 @@ export type OperationLogItem = {
   content?: string;
   ip_address?: string;
   created_at: string;
-};
-
-export type UploadResult = {
-  url: string;
-  thumbnail_url?: string;
-  file_size?: number;
 };
